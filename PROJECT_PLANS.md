@@ -20,5 +20,15 @@
 
 + **Data Pipeline**: ![Data Pipeline Flowchart](Pictures/Data_Pipeline_Flowchart.png)
 
-## 3. Project Deployment and Tech Stack
+## 3. Model Training
+
++ I will mostly us clustering algorithm like k-means clustering for this project
+
+## 4. Project Deployment and Tech Stack
+
++ **Python Libraries**: Pandas, NumPy, MatPlotLib, Scikit-Learn
+
++ **Where it will be held**: Github will hold the final project and will act as a version control system in the development of the project
+
++ **Interface**: A GUI will be created using streamlit
 
