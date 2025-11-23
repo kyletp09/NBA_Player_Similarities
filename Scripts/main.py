@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 import seaborn as sns
 
 # Import Cleaned Dataset
-df = pd.read_csv('../Datasets/career_avgs.csv')
+df = pd.read_csv('Datasets/career_avgs.csv')
 df.head()
 
 # Scaling the Features using standardization
