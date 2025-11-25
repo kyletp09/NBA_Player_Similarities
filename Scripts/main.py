@@ -8,6 +8,41 @@ from sklearn.cluster import KMeans
 from sklearn.neighbors import NearestNeighbors
 import seaborn as sns
 
+
+def plot_similarity_radar(df, target_player, stats, player_indices):
+    
+    # Convert stats to a consistent list of column names
+    labels = list(stats)   # <--- FIXED
+    
+    # Include target player at the start
+    players_to_plot = [target_player] + df['PLAYER_NAME'].iloc[player_indices].tolist()
+    
+    # Filter dataframe to only needed players
+    df_plot = df[df['PLAYER_NAME'].isin(players_to_plot)].copy()
+
+    # Normalize stats
+    df_norm = df_plot.copy()
+    for stat in labels:
+        df_norm[stat] = (df_plot[stat] - df[stat].min()) / (df[stat].max() - df[stat].min())
+    
+    # Radar chart setup
+    angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False)
+    angles = np.concatenate((angles, [angles[0]]))
+    
+    plt.figure(figsize=(8, 8))
+    
+    for i, row in df_norm.iterrows():
+        values = row[labels].tolist()  # <--- FIXED
+        values += values[:1]
+        plt.polar(angles, values, label=row['PLAYER_NAME'])
+        plt.fill(angles, values, alpha=0.1)
+    
+    plt.xticks(angles[:-1], labels)
+    plt.title(f"Similarity Radar: {target_player} vs Top 5 Similar Players")
+    plt.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+    plt.show()
+
+
 # Import Cleaned Dataset
 df = pd.read_csv('Datasets/career_avgs.csv')
 df.head()
@@ -60,5 +95,8 @@ KNN.fit(clustered_df[['Principal Component 1', 'Principal Component 2']])
 player_coords = clustered_df.loc[clustered_df['PLAYER_NAME'] == player_comparison_option][['Principal Component 1', 'Principal Component 2']]
 distances, indices = KNN.kneighbors(player_coords)
 selected_df = clustered_df.iloc[indices[0]].reset_index().drop(0)
+
+plot_similarity_radar(clustered_df, player_comparison_option, clustered_df.loc[:, "REB": "FT_PCT"], selected_df['index'].to_list())
+st.pyplot(plt.gcf())
 
 st.dataframe(selected_df)
