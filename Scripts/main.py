@@ -7,7 +7,8 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.neighbors import NearestNeighbors
 import seaborn as sns
-
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import cdist
 
 def plot_similarity_radar(df, target_player, stats, player_indices):
     
@@ -41,6 +42,56 @@ def plot_similarity_radar(df, target_player, stats, player_indices):
     plt.title(f"Similarity Radar: {target_player} vs Top 5 Similar Players")
     plt.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
     plt.show()
+
+def plot_role_hierarchy(cluster_df, top_n=10):
+    """
+     visual dendrogram for the top-N most similar players.
+    """
+
+    # find role-defining player
+    X = cluster_df[['Principal Component 1', 'Principal Component 2']].values
+    centroid = X.mean(axis=0)
+    dist_to_centroid = cdist(X, [centroid], metric='euclidean').flatten()
+    rep_idx = np.argmin(dist_to_centroid)
+    rep_player = cluster_df.iloc[rep_idx]['PLAYER_NAME']
+
+    st.markdown(f"###  Role-Defining Player: **{rep_player}**")
+
+    # Distances from representative player
+    rep_coords = X[rep_idx].reshape(1, -1)
+    dist_from_rep = cdist(X, rep_coords, metric='euclidean').flatten()
+
+    cluster_df = cluster_df.copy()
+    cluster_df['rep_distance'] = dist_from_rep
+    cluster_top = cluster_df.sort_values('rep_distance').iloc[:top_n]
+
+    X_top = cluster_top[['Principal Component 1', 'Principal Component 2']].values
+
+    # 
+    Z = linkage(X_top, method='ward')
+
+    
+    plt.figure(figsize=(14, 7))
+
+    dendrogram(
+        Z,
+        labels=cluster_top['PLAYER_NAME'].tolist(),
+        leaf_rotation=30,     
+        leaf_font_size=16,   
+        color_threshold=0.4 * max(Z[:, 2]),  
+        above_threshold_color="gray"
+    )
+
+    
+    plt.title(f"Hierarchy of Top {top_n} Similar Players — {cluster_top['Clusters'].iloc[0]}",
+              fontsize=18, fontweight='bold', pad=20)
+    plt.xlabel("Players", fontsize=12)
+    plt.ylabel("Distance", fontsize=12)
+    plt.grid(False)                   
+    plt.box(False)                     
+    plt.tight_layout()
+
+    st.pyplot(plt.gcf())
 
 
 # Import Cleaned Dataset
@@ -83,6 +134,11 @@ cluster_option = st.selectbox(
      clustered_df['Clusters'].unique())
 
 st.dataframe(clustered_df[clustered_df['Clusters'] == cluster_option])
+
+cluster_players = clustered_df[clustered_df['Clusters'] == cluster_option].reset_index(drop=True)
+
+st.markdown("## Player Hierarchy (Top 10 Similar)")
+plot_role_hierarchy(cluster_players, top_n=10)
 
 player_comparison_option = st.selectbox(
     'What player would you want to see comparisons to?',
