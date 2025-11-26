@@ -11,16 +11,9 @@ import seaborn as sns
 
 def plot_similarity_radar(df, target_player, stats, player_indices):
     
-    # Convert stats to a consistent list of column names
-    labels = list(stats)   # <--- FIXED
-    
-    # Include target player at the start
+    labels = list(stats)
     players_to_plot = [target_player] + df['PLAYER_NAME'].iloc[player_indices].tolist()
-    
-    # Filter dataframe to only needed players
     df_plot = df[df['PLAYER_NAME'].isin(players_to_plot)].copy()
-
-    # Normalize stats
     df_norm = df_plot.copy()
     for stat in labels:
         df_norm[stat] = (df_plot[stat] - df[stat].min()) / (df[stat].max() - df[stat].min())
@@ -32,7 +25,7 @@ def plot_similarity_radar(df, target_player, stats, player_indices):
     plt.figure(figsize=(8, 8))
     
     for i, row in df_norm.iterrows():
-        values = row[labels].tolist()  # <--- FIXED
+        values = row[labels].tolist()
         values += values[:1]
         plt.polar(angles, values, label=row['PLAYER_NAME'])
         plt.fill(angles, values, alpha=0.1)
