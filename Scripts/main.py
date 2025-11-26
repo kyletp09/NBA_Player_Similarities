@@ -96,7 +96,7 @@ player_coords = clustered_df.loc[clustered_df['PLAYER_NAME'] == player_compariso
 distances, indices = KNN.kneighbors(player_coords)
 selected_df = clustered_df.iloc[indices[0]].reset_index().drop(0)
 
-plot_similarity_radar(clustered_df, player_comparison_option, clustered_df.loc[:, "REB": "FT_PCT"], selected_df['index'].to_list())
+plot_similarity_radar(clustered_df, player_comparison_option, clustered_df.loc[:, "REB": "FT_PCT"], indices[0])
 st.pyplot(plt.gcf())
 
 st.dataframe(selected_df)
