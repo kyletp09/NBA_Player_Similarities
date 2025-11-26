@@ -78,6 +78,7 @@ def plot_role_hierarchy(cluster_df, top_n=10) -> None:
     plt.grid(False)                   
     plt.box(False)                     
     plt.tight_layout()
+    st.markdown(f'Archetype-Defining Player: {rep_player}')
 
 # Import Cleaned Dataset
 df = pd.read_csv('Datasets/career_avgs.csv')
@@ -120,9 +121,8 @@ cluster_option = st.selectbox(
 
 st.dataframe(clustered_df[clustered_df['Clusters'] == cluster_option])
 
-st.markdown('## Player Who Defined the Cluster and a Hiearchical Chart of Similar Players')
-
 plot_role_hierarchy(clustered_df[clustered_df['Clusters'] == cluster_option].reset_index(drop=True))
+st.pyplot(plt.gcf())
 
 player_comparison_option = st.selectbox(
     'What player would you want to see comparisons to?',
